@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace CheeeasyTech\Booking\Traits;
+namespace CheeasyTech\Booking\Traits;
 
-use CheeeasyTech\Booking\Contracts\Bookable;
-use CheeeasyTech\Booking\Events\BookingCreated;
-use CheeeasyTech\Booking\Events\BookingDeleted;
-use CheeeasyTech\Booking\Events\BookingUpdated;
-use CheeeasyTech\Booking\Booking;
+use CheeasyTech\Booking\Contracts\Bookable;
+use CheeasyTech\Booking\Events\BookingCreated;
+use CheeasyTech\Booking\Events\BookingDeleted;
+use CheeasyTech\Booking\Events\BookingUpdated;
+use CheeasyTech\Booking\Booking;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 

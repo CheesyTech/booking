@@ -1,8 +1,8 @@
 <?php
 
-namespace CheeeasyTech\Booking\Events;
+namespace CheeasyTech\Booking\Events;
 
-use CheeeasyTech\Booking\Booking;
+use CheeasyTech\Booking\Booking;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 

@@ -70,10 +70,10 @@ return [
 
         // Event classes
         'classes' => [
-            'created' => \CheeeasyTech\Booking\Events\BookingCreated::class,
-            'updated' => \CheeeasyTech\Booking\Events\BookingUpdated::class,
-            'deleted' => \CheeeasyTech\Booking\Events\BookingDeleted::class,
-            'status_changed' => \CheeeasyTech\Booking\Events\BookingStatusChanged::class,
+            'created' => \CheeasyTech\Booking\Events\BookingCreated::class,
+            'updated' => \CheeasyTech\Booking\Events\BookingUpdated::class,
+            'deleted' => \CheeasyTech\Booking\Events\BookingDeleted::class,
+            'status_changed' => \CheeasyTech\Booking\Events\BookingStatusChanged::class,
         ],
     ],
 ];

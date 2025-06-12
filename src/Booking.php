@@ -1,11 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace CheeeasyTech\Booking;
+namespace CheeasyTech\Booking;
 
 use Carbon\Carbon;
-use CheeeasyTech\Booking\Contracts\OverlapRule;
-use CheeeasyTech\Booking\Events\BookingStatusChanged;
+use CheeasyTech\Booking\Contracts\OverlapRule;
+use CheeasyTech\Booking\Events\BookingStatusChanged;
+use CheeasyTech\Booking\Rules\BusinessHoursRule;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -238,7 +239,7 @@ class Booking extends Model
     protected function resolveRule(string $ruleName, array $config): OverlapRule
     {
         $ruleMap = [
-            'business_hours' => \CheeeasyTech\Booking\Rules\BusinessHoursRule::class,
+            'business_hours' => BusinessHoursRule::class,
         ];
 
         if (!isset($ruleMap[$ruleName])) {

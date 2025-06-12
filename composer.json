@@ -1,5 +1,5 @@
 {
-  "name": "cheeeasytech/booking",
+  "name": "cheeasytech/booking",
   "description": "Implementation of multi-booking for Laravel",
   "license": "MIT",
   "type": "library",
@@ -19,12 +19,12 @@
   },
   "autoload": {
     "psr-4": {
-      "CheeeasyTech\\Booking\\": "src/"
+      "CheeasyTech\\Booking\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "CheeeasyTech\\Booking\\": "tests"
+      "CheeasyTech\\Booking\\": "tests"
     }
   },
   "config": {
@@ -36,7 +36,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "CheeeasyTech\\Booking\\BookingServiceProvider"
+        "CheeasyTech\\Booking\\BookingServiceProvider"
       ]
     }
   },

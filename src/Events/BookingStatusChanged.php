@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace CheeeasyTech\Booking\Events;
+namespace CheeasyTech\Booking\Events;
 
-use CheeeasyTech\Booking\Booking;
-use CheeeasyTech\Booking\BookingStatus;
+use CheeasyTech\Booking\Booking;
+use CheeasyTech\Booking\BookingStatus;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 

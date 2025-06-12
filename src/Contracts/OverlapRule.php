@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace CheeeasyTech\Booking\Contracts;
+namespace CheeasyTech\Booking\Contracts;
 
 use Carbon\Carbon;
-use CheeeasyTech\Booking\Booking;
+use CheeasyTech\Booking\Booking;
 
 interface OverlapRule
 {

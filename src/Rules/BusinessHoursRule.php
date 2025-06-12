@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace CheeeasyTech\Booking\Rules;
+namespace CheeasyTech\Booking\Rules;
 
 use Carbon\Carbon;
-use CheeeasyTech\Booking\Contracts\OverlapRule;
-use CheeeasyTech\Booking\Booking;
+use CheeasyTech\Booking\Contracts\OverlapRule;
+use CheeasyTech\Booking\Booking;
 
 class BusinessHoursRule implements OverlapRule
 {

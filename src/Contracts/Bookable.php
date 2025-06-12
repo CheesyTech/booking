@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace CheeeasyTech\Booking\Contracts;
+namespace CheeasyTech\Booking\Contracts;
 
 interface Bookable
 {

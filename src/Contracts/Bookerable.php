@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace CheeeasyTech\Booking\Contracts;
+namespace CheeasyTech\Booking\Contracts;
 
 interface Bookerable
 {
-    public function getBookerId(): int;
+    public function getBookerableId(): int;
 
-    public function getBookerType(): string;
+    public function getBookerableType(): string;
 } 

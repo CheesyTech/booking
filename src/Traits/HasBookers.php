@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace CheeeasyTech\Booking\Traits;
+namespace CheeasyTech\Booking\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;

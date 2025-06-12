@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CheeeasyTech\Booking;
+namespace CheeasyTech\Booking;
 
 use Carbon\Carbon;
 
