@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace CheeasyTech\Booking\Traits;
 
+use CheeasyTech\Booking\Booking;
 use CheeasyTech\Booking\Contracts\Bookable;
 use CheeasyTech\Booking\Events\BookingCreated;
 use CheeasyTech\Booking\Events\BookingDeleted;
 use CheeasyTech\Booking\Events\BookingUpdated;
-use CheeasyTech\Booking\Booking;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
