@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
             $table->morphs('bookable');
-            $table->foreignId('user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
+            $table->morphs('bookerable');
+            $table->dateTime('start_time');
+            $table->dateTime('end_time');
+            $table->string('status')->default('pending');
+            $table->json('status_history')->nullable();
+            $table->timestamp('status_changed_at')->nullable();
             $table->timestamps();
         });
     }

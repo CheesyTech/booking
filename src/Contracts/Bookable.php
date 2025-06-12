@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace CheesyTech\LaravelMultiBooking;
+namespace CheeeasyTech\Booking\Contracts;
 
-interface BookableContract
+interface Bookable
 {
     public function getBookableId(): int;
 

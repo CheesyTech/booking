@@ -1,5 +1,5 @@
 {
-  "name": "cheeasy-tech/laravel-multibooking",
+  "name": "cheeeasytech/booking",
   "description": "Implementation of multi-booking for Laravel",
   "license": "MIT",
   "type": "library",
@@ -10,7 +10,7 @@
   ],
   "require": {
     "php": ">=8.1",
-    "laravel/framework": "^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0",
+    "laravel/framework": "^10.0 || ^11.0 || ^12.0",
     "spatie/laravel-package-tools": "^1.16"
   },
   "require-dev": {
@@ -19,12 +19,12 @@
   },
   "autoload": {
     "psr-4": {
-      "CheeasyTech\\LaravelMultibooking\\": "src/"
+      "CheeeasyTech\\Booking\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "CheeasyTech\\LaravelMultibooking\\": "tests"
+      "CheeeasyTech\\Booking\\": "tests"
     }
   },
   "config": {
@@ -36,7 +36,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "CheesyTech\\LaravelMultiBooking\\BookingServiceProvider"
+        "CheeeasyTech\\Booking\\BookingServiceProvider"
       ]
     }
   },

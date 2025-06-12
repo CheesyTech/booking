@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace CheesyTech\LaravelBooking;
+namespace CheeeasyTech\Booking;
 
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -12,7 +12,7 @@ final class BookingServiceProvider extends PackageServiceProvider
     public function configurePackage(Package $package): void
     {
         $package
-            ->name('laravel-booking')
+            ->name('booking')
             ->hasConfigFile('booking')
             ->hasMigration('create_bookings_table')
             ->hasInstallCommand(function (InstallCommand $command) {

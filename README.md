@@ -1,70 +1,233 @@
-# Laravel Multi-Booking
+# Laravel MultiBooking
 
-**Laravel Mutli-Booking** is a flexible multi-booking system for Laravel applications. It allows users to book various processes (e.g., training sessions, seminars) that implement the `BookableContract`.
+A flexible and powerful booking system for Laravel applications that supports polymorphic relationships and time slot management.
+
+## Features
+
+- 🕒 Time slot management with overlap prevention
+- 🔄 Polymorphic relationships for bookable resources
+- ⚙️ Configurable validation rules
+- 🎯 Custom booking rules support
+- 📅 Business hours validation
+- 🔒 Booking duration limits
+- 🎨 Easy to extend and customize
 
 ## Installation
 
-To install the package, simply run:
+You can install the package via composer:
 
 ```bash
-composer require cheeasytech/laravel-multi-booking
+composer require cheesytech/laravel-multibooking
 ```
 
-## Publish Config and Migrations
-Once installed, you can publish the configuration file and migrations:
-```bash
-php artisan vendor:publish --provider="CheesyTech\LaravelMultiBooking\BookingServiceProvider" --tag="config"
-php artisan vendor:publish --provider="CheesyTech\LaravelMultiBooking\BookingServiceProvider" --tag="migrations"
-```
-
-Run the migrations to create the necessary tables:
-```bash
-php artisan migrate
-```
+The package will automatically register its service provider.
 
 ## Configuration
 
-In the <code>config/booking.php</code> file, set the user model for the system:
+Publish the configuration file:
 
-```php
-return [
-    'user_model' => \App\Models\User::class,
-];
+```bash
+php artisan vendor:publish --provider="CheesyTech\LaravelMultiBooking\BookingServiceProvider"
 ```
 
-## Usage
+This will create a `config/booking.php` file in your config directory.
 
-### Defining Bookable Entities
+## Basic Usage
 
-Any process that can be booked (like a seminar or a training session) should implement the **BookableContract**. 
+### 1. Prepare Your Models
 
-For example:
+Add the `HasBookings` trait to your bookable model:
+
 ```php
-namespace App\Models;
+use CheeasyTech\LaravelMultibooking\HasBookings;
 
-use CheeasyTech\LaravelMultiBooking\BookableContract;
-use Illuminate\Database\Eloquent\Model;
-
-class TrainingSession extends Model implements BookableContract
+class Room extends Model
 {
-    public function getBookableId(): int
+    use HasBookings;
+}
+```
+
+### 2. Create a Booking
+
+```php
+$room = Room::find(1);
+$user = User::find(1);
+
+$booking = new Booking();
+$booking->bookable()->associate($room);
+$booking->bookerable()->associate($user);
+$booking->start_time = '2024-03-20 10:00:00';
+$booking->end_time = '2024-03-20 11:00:00';
+$booking->save();
+```
+
+### 3. Check for Overlaps
+
+```php
+$hasOverlap = $booking->hasOverlap(
+    Carbon::parse('2024-03-20 10:00:00'),
+    Carbon::parse('2024-03-20 11:00:00')
+);
+
+if ($hasOverlap) {
+    throw new Exception('This time slot is already booked');
+}
+```
+
+## Configuration Options
+
+### Overlap Settings
+
+```php
+'overlap' => [
+    'enabled' => true,
+    'allow_same_booker' => false,
+    'min_time_between' => 30, // minutes
+    'max_duration' => 120,    // minutes
+    'rules' => [
+        'business_hours' => [
+            'enabled' => true,
+            'start' => '09:00',
+            'end' => '18:00',
+            'timezone' => 'UTC',
+        ],
+    ],
+],
+```
+
+### Events
+
+```php
+'events' => [
+    'enabled' => true,
+    'classes' => [
+        'created' => \CheeeasyTech\Booking\Events\BookingCreated::class,
+        'updated' => \CheeeasyTech\Booking\Events\BookingUpdated::class,
+        'deleted' => \CheeeasyTech\Booking\Events\BookingDeleted::class,
+        'status_changed' => \CheeeasyTech\Booking\Events\BookingStatusChanged::class,
+    ],
+],
+```
+
+## Status Management
+
+The package includes a robust status management system:
+
+```php
+// Change booking status
+$booking->changeStatus('confirmed', 'Payment received', ['payment_id' => 123]);
+
+// Get current status
+$currentStatus = $booking->getCurrentStatus();
+
+// Get status history
+$statusHistory = $booking->getStatusHistory();
+
+// Check if booking has specific status
+$isConfirmed = $booking->hasStatus('confirmed');
+```
+
+### Available Statuses
+
+```php
+'statuses' => [
+    'pending' => [
+        'label' => 'Pending',
+        'color' => '#FFA500',
+        'can_transition_to' => ['confirmed', 'cancelled'],
+    ],
+    'confirmed' => [
+        'label' => 'Confirmed',
+        'color' => '#008000',
+        'can_transition_to' => ['cancelled', 'completed'],
+    ],
+    'cancelled' => [
+        'label' => 'Cancelled',
+        'color' => '#FF0000',
+        'can_transition_to' => [],
+    ],
+    'completed' => [
+        'label' => 'Completed',
+        'color' => '#0000FF',
+        'can_transition_to' => [],
+    ],
+],
+```
+
+## Custom Rules
+
+Create your own booking rules by implementing the `OverlapRule` interface:
+
+```php
+use CheeeasyTech\Booking\Contracts\OverlapRule;
+
+class WeekendRule implements OverlapRule
+{
+    public function validate(Booking $booking, Carbon $startTime, Carbon $endTime): bool
     {
-        return $this->id;
+        return !$startTime->isWeekend() && !$endTime->isWeekend();
     }
 
-    public function getBookableType(): string
+    public function getErrorMessage(): string
     {
-        return static::class;
+        return 'Bookings are not allowed on weekends';
     }
 }
 ```
 
-### User Bookings
-
-Users can book processes (e.g., training sessions) using the book method.
+Register your rule in the configuration:
 
 ```php
-// Get all bookings for a user
-$user->bookings;
+'rules' => [
+    'weekend' => [
+        'enabled' => true,
+    ],
+],
 ```
+
+## Available Methods
+
+### Booking Model
+
+- `bookable()`: Get the bookable resource
+- `bookerable()`: Get the booking entity
+- `hasOverlap()`: Check for booking overlaps
+- `getDurationInMinutes()`: Get booking duration
+- `validateTimeSlot()`: Validate time slot
+- `changeStatus()`: Change booking status
+- `getCurrentStatus()`: Get current status object
+- `getStatusHistory()`: Get status history
+- `hasStatus()`: Check if booking has specific status
+
+### HasBookings Trait
+
+- `bookings()`: Get all bookings
+- `availableSlots()`: Get available time slots
+- `isAvailable()`: Check if resource is available
+
+## Events
+
+The package fires the following events:
+
+- `BookingCreated`: When a new booking is created
+- `BookingUpdated`: When a booking is updated
+- `BookingDeleted`: When a booking is deleted
+- `BookingStatusChanged`: When a booking status is changed
+
+## Contributing
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## Security
+
+If you discover any security related issues, please email security@cheesytech.com instead of using the issue tracker.
+
+## Credits
+
+- [CheesyTech](https://github.com/cheesytech)
+- [All Contributors](../../contributors)
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
