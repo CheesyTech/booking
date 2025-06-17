@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CheeasyTech\Booking\Traits;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait HasBookings
 {
-    public function bookings(string|array $type = null): MorphMany
+    public function bookings(string|array|null $type = null): MorphMany
     {
         /** @var Model $this */
         $query = $this->morphMany(Booking::class, 'bookable');
@@ -38,19 +39,21 @@ trait HasBookings
             'bookable_type' => $bookable->getBookableType(),
         ]);
         event(new BookingCreated($booking));
+
         return $booking;
     }
 
     public function deleteBooking(Bookable $bookable): bool
     {
         $booking = $this->findBooking($bookable);
-        if (!$booking) {
+        if (! $booking) {
             return false;
         }
         $deleted = $booking->delete();
         if ($deleted) {
             event(new BookingDeleted($booking));
         }
+
         return $deleted;
     }
 
@@ -67,13 +70,14 @@ trait HasBookings
     public function updateBooking(Bookable $bookable, array $attributes): bool
     {
         $booking = $this->findBooking($bookable);
-        if (!$booking) {
+        if (! $booking) {
             return false;
         }
         $updated = $booking->update($attributes);
         if ($updated) {
             event(new BookingUpdated($booking));
         }
+
         return $updated;
     }
 }

@@ -1,19 +1,22 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CheeasyTech\Booking;
 
 use Carbon\Carbon;
 use CheeasyTech\Booking\Contracts\OverlapRule;
+use CheeasyTech\Booking\Database\DurationGrammar;
 use CheeasyTech\Booking\Events\BookingStatusChanged;
 use CheeasyTech\Booking\Rules\BusinessHoursRule;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 use InvalidArgumentException;
-use Illuminate\Support\Collection;
 
 class Booking extends Model
 {
@@ -38,6 +41,34 @@ class Booking extends Model
         'status_changed_at' => 'datetime',
     ];
 
+    protected static function newFactory()
+    {
+        return \CheeasyTech\Booking\Tests\Factories\BookingFactory::new();
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($booking) {
+            if ($booking->hasOverlap($booking->start_time, $booking->end_time, $booking->id)) {
+                throw new \Exception('This time slot overlaps with an existing booking.');
+            }
+        });
+
+        static::created(function ($booking) {
+            event(new \CheeasyTech\Booking\Events\BookingCreated($booking));
+        });
+
+        static::updated(function ($booking) {
+            event(new \CheeasyTech\Booking\Events\BookingUpdated($booking));
+        });
+
+        static::deleted(function ($booking) {
+            event(new \CheeasyTech\Booking\Events\BookingDeleted($booking));
+        });
+    }
+
     public function bookable(): MorphTo
     {
         return $this->morphTo();
@@ -51,30 +82,26 @@ class Booking extends Model
     /**
      * Change the booking status
      *
-     * @param string $status
-     * @param string|null $reason
-     * @param array|null $metadata
      * @return $this
+     *
      * @throws InvalidArgumentException
      */
     public function changeStatus(string $status, ?string $reason = null, ?array $metadata = null): self
     {
         $allowedStatuses = Config::get('booking.statuses', ['pending', 'confirmed', 'cancelled']);
-        
-        if (!in_array($status, $allowedStatuses)) {
+
+        if (! in_array($status, $allowedStatuses)) {
             throw new InvalidArgumentException("Invalid status: {$status}");
         }
 
         $newStatus = new BookingStatus($status, $reason, null, $metadata);
-        
+
         // Initialize status history if not exists
-        if (!$this->status_history) {
-            $this->status_history = [];
-        }
+        $history = $this->status_history ?? [];
 
         // Add current status to history
         if ($this->status) {
-            $this->status_history[] = (new BookingStatus(
+            $history[] = (new BookingStatus(
                 $this->status,
                 null,
                 $this->status_changed_at
@@ -83,6 +110,7 @@ class Booking extends Model
 
         $this->status = $status;
         $this->status_changed_at = $newStatus->getChangedAt();
+        $this->status_history = $history;
         $this->save();
 
         // Fire status changed event
@@ -93,8 +121,6 @@ class Booking extends Model
 
     /**
      * Get the current status object
-     *
-     * @return BookingStatus
      */
     public function getCurrentStatus(): BookingStatus
     {
@@ -107,12 +133,10 @@ class Booking extends Model
 
     /**
      * Get the status history
-     *
-     * @return Collection
      */
     public function getStatusHistory(): Collection
     {
-        if (!$this->status_history) {
+        if (! $this->status_history) {
             return collect();
         }
 
@@ -123,9 +147,6 @@ class Booking extends Model
 
     /**
      * Check if the booking has a specific status
-     *
-     * @param string $status
-     * @return bool
      */
     public function hasStatus(string $status): bool
     {
@@ -135,8 +156,6 @@ class Booking extends Model
     /**
      * Validate the time slot
      *
-     * @param array $data
-     * @return bool
      * @throws InvalidArgumentException
      */
     public static function validateTimeSlot(array $data): bool
@@ -156,15 +175,11 @@ class Booking extends Model
     /**
      * Check if the time slot overlaps with existing bookings
      *
-     * @param Carbon $startTime
-     * @param Carbon $endTime
-     * @param int|null $excludeBookingId
-     * @return bool
      * @throws InvalidArgumentException
      */
     public function hasOverlap(Carbon $startTime, Carbon $endTime, ?int $excludeBookingId = null): bool
     {
-        if (!Config::get('booking.overlap.enabled', true)) {
+        if (! Config::get('booking.overlap.enabled', true)) {
             return false;
         }
 
@@ -208,9 +223,9 @@ class Booking extends Model
         // Apply custom rules
         $rules = Config::get('booking.overlap.rules', []);
         foreach ($rules as $ruleName => $ruleConfig) {
-            if (!empty($ruleConfig['enabled'])) {
+            if (! empty($ruleConfig['enabled'])) {
                 $rule = $this->resolveRule($ruleName, $ruleConfig);
-                if (!$rule->validate($this, $startTime, $endTime)) {
+                if (! $rule->validate($this, $startTime, $endTime)) {
                     throw new InvalidArgumentException($rule->getErrorMessage());
                 }
             }
@@ -221,8 +236,6 @@ class Booking extends Model
 
     /**
      * Get the duration of the booking in minutes
-     *
-     * @return int
      */
     public function getDurationInMinutes(): int
     {
@@ -230,11 +243,66 @@ class Booking extends Model
     }
 
     /**
+     * Get the duration of the booking in hours
+     */
+    public function getDurationInHours(): float
+    {
+        return $this->getDurationInMinutes() / 60;
+    }
+
+    /**
+     * Get the duration of the booking in days
+     */
+    public function getDurationInDays(): float
+    {
+        return $this->getDurationInHours() / 24;
+    }
+
+    /**
+     * Scope a query to only include bookings with duration longer than specified minutes
+     */
+    public function scopeDurationLongerThan(Builder $query, int $minutes): Builder
+    {
+        $duration = DurationGrammar::getDurationExpression('start_time', 'end_time');
+
+        return $query->whereRaw("{$duration} > ?", [$minutes]);
+    }
+
+    /**
+     * Scope a query to only include bookings with duration shorter than specified minutes
+     */
+    public function scopeDurationShorterThan(Builder $query, int $minutes): Builder
+    {
+        $duration = DurationGrammar::getDurationExpression('start_time', 'end_time');
+
+        return $query->whereRaw("{$duration} < ?", [$minutes]);
+    }
+
+    /**
+     * Scope a query to only include bookings with duration equal to specified minutes
+     */
+    public function scopeDurationEquals(Builder $query, int $minutes): Builder
+    {
+        $duration = DurationGrammar::getDurationExpression('start_time', 'end_time');
+
+        return $query->whereRaw("{$duration} = ?", [$minutes]);
+    }
+
+    /**
+     * Scope a query to only include bookings with duration between specified minutes
+     */
+    public function scopeDurationBetween(Builder $query, int $minMinutes, int $maxMinutes): Builder
+    {
+        $duration = DurationGrammar::getDurationExpression('start_time', 'end_time');
+
+        return $query->whereRaw(
+            "{$duration} BETWEEN ? AND ?",
+            [$minMinutes, $maxMinutes]
+        );
+    }
+
+    /**
      * Resolve a rule instance from configuration
-     *
-     * @param string $ruleName
-     * @param array $config
-     * @return OverlapRule
      */
     protected function resolveRule(string $ruleName, array $config): OverlapRule
     {
@@ -242,11 +310,12 @@ class Booking extends Model
             'business_hours' => BusinessHoursRule::class,
         ];
 
-        if (!isset($ruleMap[$ruleName])) {
+        if (! isset($ruleMap[$ruleName])) {
             throw new InvalidArgumentException("Unknown rule: {$ruleName}");
         }
 
         $ruleClass = $ruleMap[$ruleName];
+
         return new $ruleClass(
             $config['start'] ?? '09:00',
             $config['end'] ?? '18:00',

@@ -1,21 +1,27 @@
 {
-  "name": "cheeasytech/booking",
-  "description": "Implementation of multi-booking for Laravel",
-  "license": "MIT",
+  "name": "cheesytech/booking",
+  "description": "A flexible and powerful booking system for Laravel applications",
   "type": "library",
+  "license": "MIT",
   "authors": [
     {
-      "name": "Nikita Koida"
+      "name": "Nikita Koida",
+      "email": "cheeeasy2501@gmail.com"
     }
   ],
   "require": {
-    "php": ">=8.1",
+    "php": "^8.1",
     "laravel/framework": "^10.0 || ^11.0 || ^12.0",
-    "spatie/laravel-package-tools": "^1.16"
+    "nesbot/carbon": "^2.0",
+    "spatie/laravel-package-tools": "^1.92"
   },
   "require-dev": {
-    "ergebnis/composer-normalize": "^2.43",
-    "pestphp/pest": ">=2.35.1"
+    "orchestra/testbench": "^8.0",
+    "phpunit/phpunit": "^10.0",
+    "mockery/mockery": "^1.5",
+    "laravel/pint": "^1.0",
+    "nunomaduro/collision": "^7.0",
+    "ergebnis/composer-normalize": "^2.43"
   },
   "autoload": {
     "psr-4": {
@@ -24,13 +30,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "CheeasyTech\\Booking\\": "tests"
-    }
-  },
-  "config": {
-    "allow-plugins": {
-      "ergebnis/composer-normalize": true,
-      "pestphp/pest-plugin": true
+      "CheeasyTech\\Booking\\Tests\\": "tests/"
     }
   },
   "extra": {
@@ -41,6 +41,16 @@
     }
   },
   "scripts": {
-    "test": "vendor/bin/pest"
-  }
+    "test": "vendor/bin/phpunit",
+    "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
+    "format": "vendor/bin/pint"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "ergebnis/composer-normalize": true
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }

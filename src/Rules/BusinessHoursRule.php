@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace CheeasyTech\Booking\Rules;
 
 use Carbon\Carbon;
-use CheeasyTech\Booking\Contracts\OverlapRule;
 use CheeasyTech\Booking\Booking;
+use CheeasyTech\Booking\Contracts\OverlapRule;
 
 class BusinessHoursRule implements OverlapRule
 {
     protected string $startTime;
+
     protected string $endTime;
+
     protected string $timezone;
 
     public function __construct(string $startTime, string $endTime, string $timezone = 'UTC')
@@ -37,4 +39,4 @@ class BusinessHoursRule implements OverlapRule
     {
         return "Bookings are only allowed between {$this->startTime} and {$this->endTime} {$this->timezone}";
     }
-} 
+}

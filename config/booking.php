@@ -10,9 +10,6 @@ return [
     |
     */
 
-    // User model for bookings
-    'user_model' => \App\Models\User::class,
-
     // Available booking statuses
     'statuses' => [
         'pending' => [

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CheeasyTech\Booking\Events;
@@ -11,7 +12,5 @@ class BookingDeleted
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public Booking $booking)
-    {
-    }
-} 
+    public function __construct(public Booking $booking) {}
+}

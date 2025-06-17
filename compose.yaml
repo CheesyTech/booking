@@ -1,0 +1,15 @@
+services:
+  dev:
+    build:
+      context: .
+      target: development
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    volumes:
+      - .:/app:cached
+      - ~/.composer:/home/developer/.composer:cached
+    environment:
+      XDEBUG_MODE: "${XDEBUG_MODE:-debug,coverage}"
+      PHP_IDE_CONFIG: "serverName=Docker"
+    tty: true 

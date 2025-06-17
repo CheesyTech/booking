@@ -14,6 +14,7 @@ class BookingStatusChanged
     use Dispatchable, SerializesModels;
 
     public Booking $booking;
+
     public BookingStatus $newStatus;
 
     /**
@@ -24,4 +25,4 @@ class BookingStatusChanged
         $this->booking = $booking;
         $this->newStatus = $newStatus;
     }
-} 
+}

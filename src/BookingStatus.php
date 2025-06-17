@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace CheeasyTech\Booking;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Config;
+use InvalidArgumentException;
 
 class BookingStatus
 {
     protected string $status;
+
     protected ?string $reason;
+
     protected ?Carbon $changedAt;
+
     protected ?array $metadata;
 
     public function __construct(
@@ -19,10 +24,20 @@ class BookingStatus
         ?Carbon $changedAt = null,
         ?array $metadata = null
     ) {
+        $this->validateStatus($status);
         $this->status = $status;
         $this->reason = $reason;
         $this->changedAt = $changedAt ?? Carbon::now();
         $this->metadata = $metadata;
+    }
+
+    protected function validateStatus(string $status): void
+    {
+        $allowedStatuses = Config::get('booking.statuses', ['pending', 'confirmed', 'cancelled']);
+
+        if (! in_array($status, $allowedStatuses)) {
+            throw new InvalidArgumentException("Invalid status: {$status}");
+        }
     }
 
     public function getStatus(): string
@@ -50,13 +65,17 @@ class BookingStatus
         return [
             'status' => $this->status,
             'reason' => $this->reason,
-            'changed_at' => $this->changedAt->toIso8601String(),
+            'changed_at' => $this->changedAt->toDateTimeString(),
             'metadata' => $this->metadata,
         ];
     }
 
     public static function fromArray(array $data): self
     {
+        if (! isset($data['status'])) {
+            throw new InvalidArgumentException('Status is required');
+        }
+
         return new self(
             $data['status'],
             $data['reason'] ?? null,
@@ -64,4 +83,4 @@ class BookingStatus
             $data['metadata'] ?? null
         );
     }
-} 
+}

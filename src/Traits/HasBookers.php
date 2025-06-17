@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace CheeasyTech\Booking\Traits;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 trait HasBookers
 {
-    public function bookings(string|array $type = null): MorphToMany
+    public function bookings(string|array|null $type = null): MorphToMany
     {
         /** @var Model $this */
         $query = $this->morphToMany(
