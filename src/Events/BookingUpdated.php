@@ -2,7 +2,7 @@
 
 namespace CheeasyTech\Booking\Events;
 
-use CheeasyTech\Booking\Booking;
+use CheeasyTech\Booking\Models\Booking;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 

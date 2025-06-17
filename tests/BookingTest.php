@@ -3,11 +3,11 @@
 namespace CheeasyTech\Booking\Tests;
 
 use Carbon\Carbon;
-use CheeasyTech\Booking\Booking;
 use CheeasyTech\Booking\Events\BookingCreated;
 use CheeasyTech\Booking\Events\BookingDeleted;
 use CheeasyTech\Booking\Events\BookingStatusChanged;
 use CheeasyTech\Booking\Events\BookingUpdated;
+use CheeasyTech\Booking\Models\Booking;
 use CheeasyTech\Booking\Tests\Models\Room;
 use CheeasyTech\Booking\Tests\Models\User;
 use Illuminate\Support\Facades\DB;

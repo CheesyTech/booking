@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace CheeasyTech\Booking\Rules;
 
 use Carbon\Carbon;
-use CheeasyTech\Booking\Booking;
 use CheeasyTech\Booking\Contracts\OverlapRule;
+use CheeasyTech\Booking\Models\Booking;
 
 class BusinessHoursRule implements OverlapRule
 {

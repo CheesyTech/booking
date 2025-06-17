@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace CheeasyTech\Booking\Traits;
 
-use CheeasyTech\Booking\Booking;
 use CheeasyTech\Booking\Contracts\Bookerable;
+use CheeasyTech\Booking\Models\Booking;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 

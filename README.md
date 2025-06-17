@@ -89,7 +89,7 @@ return [
 ## Quick Start
 
 ```php
-use CheeasyTech\Booking\Booking;
+use CheeasyTech\Booking\Models\Booking;
 use Carbon\Carbon;
 
 // Setup your models with the traits and interfaces

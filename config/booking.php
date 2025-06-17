@@ -53,9 +53,7 @@ return [
             // Example: Prevent bookings outside business hours
             'business_hours' => [
                 'enabled' => false,
-                'start' => '09:00',
-                'end' => '18:00',
-                'timezone' => 'UTC',
+                'class' => \CheeasyTech\Booking\Rules\BusinessHoursRule::class,
             ],
         ],
     ],

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CheeasyTech\Booking\Contracts;
 
 use Carbon\Carbon;
-use CheeasyTech\Booking\Booking;
+use CheeasyTech\Booking\Models\Booking;
 
 interface OverlapRule
 {
