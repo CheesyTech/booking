@@ -10,12 +10,10 @@ use CheeasyTech\Booking\Contracts\OverlapRule;
 use CheeasyTech\Booking\Database\DurationGrammar;
 use CheeasyTech\Booking\Events\BookingStatusChanged;
 use CheeasyTech\Booking\Rules\BusinessHoursRule;
-use CheeasyTech\Booking\Traits\SendsBookingNotifications;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
@@ -39,7 +37,6 @@ use InvalidArgumentException;
 class Booking extends Model
 {
     use HasFactory;
-    use SendsBookingNotifications;
 
     protected $fillable = [
         'bookable_id',
@@ -77,7 +74,6 @@ class Booking extends Model
 
         static::created(function ($booking) {
             event(new \CheeasyTech\Booking\Events\BookingCreated($booking));
-            $booking->sendCreatedNotification();
         });
 
         static::updated(function ($booking) {
@@ -135,7 +131,6 @@ class Booking extends Model
 
         // Fire status changed event
         event(new BookingStatusChanged($this, $newStatus));
-        $this->sendStatusChangedNotification($newStatus);
 
         return $this;
     }
