@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace CheeasyTech\Booking;
+namespace CheeasyTech\Booking\Models;
 
 use Carbon\Carbon;
+use CheeasyTech\Booking\BookingStatus;
 use CheeasyTech\Booking\Contracts\OverlapRule;
 use CheeasyTech\Booking\Database\DurationGrammar;
 use CheeasyTech\Booking\Events\BookingStatusChanged;
@@ -18,6 +19,21 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 use InvalidArgumentException;
 
+/**
+ * 
+ *
+ * @property-read Model|\Eloquent $bookable
+ * @property-read Model|\Eloquent $bookerable
+ * @method static Builder|Booking durationBetween(int $minMinutes, int $maxMinutes)
+ * @method static Builder|Booking durationEquals(int $minutes)
+ * @method static Builder|Booking durationLongerThan(int $minutes)
+ * @method static Builder|Booking durationShorterThan(int $minutes)
+ * @method static \CheeasyTech\Booking\Tests\Factories\BookingFactory factory($count = null, $state = [])
+ * @method static Builder|Booking newModelQuery()
+ * @method static Builder|Booking newQuery()
+ * @method static Builder|Booking query()
+ * @mixin \Eloquent
+ */
 class Booking extends Model
 {
     use HasFactory;

@@ -3,7 +3,7 @@
 namespace CheeasyTech\Booking\Tests\Factories;
 
 use Carbon\Carbon;
-use CheeasyTech\Booking\Booking;
+use CheeasyTech\Booking\Models\Booking;
 use CheeasyTech\Booking\Tests\Models\Room;
 use CheeasyTech\Booking\Tests\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
