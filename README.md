@@ -1,30 +1,28 @@
 # Laravel Booking
 
-A flexible and powerful booking system for Laravel applications that supports polymorphic relationships and time slot management.
+A flexible and powerful booking system for Laravel applications that supports polymorphic relationships, time slot management, and advanced status tracking.
 
 ## Features
 
 - 🕒 Time slot management with overlap prevention
-- 🔄 Polymorphic relationships for bookable resources
-- ⚙️ Configurable validation rules
-- 🎯 Custom booking rules support
-- 📅 Business hours validation
-- 🔒 Booking duration limits
-- 🎨 Easy to extend and customize
-- 📊 Status tracking with history
-- 🔄 Event-driven architecture
-- 🛡️ Built-in validation rules
-- 🧪 Comprehensive testing support
-- 🔍 Advanced querying capabilities
+- 🔄 Polymorphic relationships for bookable and bookerable resources
+- ⚙️ Configurable validation and overlap rules
+- 🎯 Custom booking rules via OverlapRule interface
+- 📅 Business hours and custom rules validation
+- 🔒 Booking duration and minimum interval limits
+- 🎨 Easy to extend with traits and interfaces
+- 📊 Status tracking with full history and metadata
+- 🔄 Event-driven architecture (BookingCreated, BookingUpdated, etc.)
+- 🧪 Comprehensive testing support and model factories
+- 🔍 Advanced querying and duration-based scopes (cross-DB)
 - 💾 Multi-database support (MySQL, PostgreSQL, SQLite, SQL Server)
-- ⏱️ Flexible duration calculations
-- 🔄 Status history tracking
-- 🎯 Configurable overlap rules
+- ⏱️ Flexible duration calculations (minutes, hours, days)
+- 🛠️ Publishable config and migration files
 
 ## Requirements
 
 - PHP 8.1 or higher
-- Laravel 10.0 or higher
+- Laravel 10.0, 11.0, or 12.0
 - Carbon 2.0 or higher
 
 ## Installation
@@ -50,40 +48,91 @@ php artisan migrate
 php artisan vendor:publish --provider="CheeasyTech\Booking\BookingServiceProvider" --tag="config"
 ```
 
+Or use the install command for all at once:
+
+```bash
+php artisan package:install cheesytech/booking
+```
+
 This will create a `config/booking.php` file in your config directory.
 
 ## Configuration
 
-The package is highly configurable through the `config/booking.php` file:
+The package is highly configurable through the `config/booking.php` file. Example:
 
 ```php
 return [
-    // Define allowed booking statuses
     'statuses' => [
-        'pending',
-        'confirmed',
-        'cancelled'
+        'pending' => [
+            'label' => 'Pending',
+            'color' => '#FFA500',
+            'can_transition_to' => ['confirmed', 'cancelled'],
+        ],
+        'confirmed' => [
+            'label' => 'Confirmed',
+            'color' => '#008000',
+            'can_transition_to' => ['cancelled', 'completed'],
+        ],
+        'cancelled' => [
+            'label' => 'Cancelled',
+            'color' => '#FF0000',
+            'can_transition_to' => [],
+        ],
+        'completed' => [
+            'label' => 'Completed',
+            'color' => '#0000FF',
+            'can_transition_to' => [],
+        ],
     ],
-
-    // Configure overlap rules
     'overlap' => [
         'enabled' => true,
         'allow_same_booker' => false,
-        'min_time_between' => 30, // minutes
-        'max_duration' => 120, // minutes
+        'min_time_between' => 0,
+        'max_duration' => 0,
         'rules' => [
             'business_hours' => [
-                'enabled' => true,
+                'enabled' => false,
                 'class' => \CheeasyTech\Booking\Rules\BusinessHoursRule::class,
-                'config' => [
-                    'start_time' => '09:00',
-                    'end_time' => '18:00',
-                    'days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
-                ]
-            ]
-        ]
-    ]
+            ],
+        ],
+    ],
+    'events' => [
+        'enabled' => true,
+        'classes' => [
+            'created' => \CheeasyTech\Booking\Events\BookingCreated::class,
+            'updated' => \CheeasyTech\Booking\Events\BookingUpdated::class,
+            'deleted' => \CheeasyTech\Booking\Events\BookingDeleted::class,
+            'status_changed' => \CheeasyTech\Booking\Events\BookingStatusChanged::class,
+        ],
+    ],
 ];
+```
+
+## Model Setup
+
+Implement the provided interfaces and use the traits for your models:
+
+```php
+use CheeasyTech\Booking\Contracts\Bookable;
+use CheeasyTech\Booking\Traits\HasBookings;
+use Illuminate\Database\Eloquent\Model;
+
+class Room extends Model implements Bookable {
+    use HasBookings;
+    // ...
+    public function getBookableId(): int { return $this->id; }
+    public function getBookableType(): string { return static::class; }
+}
+
+use CheeasyTech\Booking\Contracts\Bookerable;
+use CheeasyTech\Booking\Traits\HasBookers;
+
+class User extends Model implements Bookerable {
+    use HasBookers;
+    // ...
+    public function getBookerableId(): int|string { return $this->id; }
+    public function getBookerableType(): string { return static::class; }
+}
 ```
 
 ## Quick Start
@@ -92,11 +141,6 @@ return [
 use CheeasyTech\Booking\Models\Booking;
 use Carbon\Carbon;
 
-// Setup your models with the traits and interfaces
-class Room extends Model implements Bookable { /* ... */ }
-class User extends Model implements Bookerable { /* ... */ }
-
-// Create a booking
 $room = Room::find(1);
 $user = User::find(1);
 
@@ -111,12 +155,20 @@ $booking->save();
 // Change booking status
 $booking->changeStatus('confirmed', 'Approved by admin', ['key' => 'value']);
 
-// Check availability
+// Check for overlap
 $isAvailable = !$booking->hasOverlap(
     Carbon::tomorrow()->setHour(10),
     Carbon::tomorrow()->setHour(11)
 );
 ```
+
+## Traits & Interfaces
+
+- **HasBookings**: Add to bookable models (e.g., Room) for convenient booking management (`newBooking`, `deleteBooking`, etc.).
+- **HasBookers**: Add to bookerable models (e.g., User) for managing bookings made by the entity.
+- **Bookable**: Interface for resources to be booked (must implement `getBookableId`, `getBookableType`).
+- **Bookerable**: Interface for entities making bookings (must implement `getBookerableId`, `getBookerableType`).
+- **OverlapRule**: Interface for custom overlap validation rules.
 
 ## Database Schema
 
@@ -125,15 +177,14 @@ The package creates the following database table:
 ```php
 Schema::create('bookings', function (Blueprint $table) {
     $table->id();
-    $table->morphs('bookable');    // For the resource being booked (e.g., room, service)
-    $table->morphs('bookerable');  // For the entity making the booking (e.g., user, organization)
+    $table->morphs('bookable');
+    $table->morphs('bookerable');
     $table->dateTime('start_time');
     $table->dateTime('end_time');
-    $table->string('status')->nullable();
+    $table->string('status')->default('pending');
     $table->json('status_history')->nullable();
     $table->timestamp('status_changed_at')->nullable();
     $table->timestamps();
-    $table->softDeletes();
 });
 ```
 
@@ -141,154 +192,55 @@ Schema::create('bookings', function (Blueprint $table) {
 
 ### Query Scopes
 
-The package provides powerful query scopes for duration-based filtering that work across different database systems:
-
 ```php
 // Get bookings longer than 2 hours
-$longBookings = Booking::durationLongerThan(120)->get();
-
-// Get short bookings (less than 30 minutes)
-$shortBookings = Booking::durationShorterThan(30)->get();
-
-// Get bookings with exact duration
-$oneHourBookings = Booking::durationEquals(60)->get();
-
+Booking::durationLongerThan(120)->get();
 // Get bookings between 1 and 2 hours
-$mediumBookings = Booking::durationBetween(60, 120)->get();
-
+Booking::durationBetween(60, 120)->get();
 // Combine with other conditions
-$confirmedLongBookings = Booking::durationLongerThan(120)
-    ->where('status', 'confirmed')
-    ->get();
+Booking::durationLongerThan(120)->where('status', 'confirmed')->get();
 ```
 
 ### Status Management
 
-The package includes a robust status management system:
-
 ```php
-// Change status with metadata
-$booking->changeStatus(
-    'confirmed',
-    'Approved by supervisor',
-    ['approver_id' => 123]
-);
-
-// Get current status
+$booking->changeStatus('confirmed', 'Approved by supervisor', ['approver_id' => 123]);
 $status = $booking->getCurrentStatus();
-echo $status->getStatus();        // 'confirmed'
-echo $status->getReason();        // 'Approved by supervisor'
-echo $status->getMetadata();      // ['approver_id' => 123]
-
-// Get status history
 $history = $booking->getStatusHistory();
-foreach ($history as $status) {
-    echo $status->getStatus();
-    echo $status->getChangedAt()->format('Y-m-d H:i:s');
-}
-
-// Check current status
-if ($booking->hasStatus('confirmed')) {
-    // Do something
-}
+if ($booking->hasStatus('confirmed')) { /* ... */ }
 ```
 
-### Event Handling
+### Overlap & Custom Rules
 
-The package fires events for all major actions:
+- Prevents overlapping bookings by default.
+- Supports minimum interval and max duration.
+- Add custom rules by implementing `OverlapRule` and registering in config.
+- Example: BusinessHoursRule restricts bookings to business hours.
+
+### Events
+
+Events are fired for all major actions:
+- BookingCreated
+- BookingUpdated
+- BookingDeleted
+- BookingStatusChanged
+
+### Testing & Factories
+
+Use provided factories for testing:
 
 ```php
-use CheeasyTech\Booking\Events\BookingCreated;
-use CheeasyTech\Booking\Events\BookingUpdated;
-use CheeasyTech\Booking\Events\BookingDeleted;
-use CheeasyTech\Booking\Events\BookingStatusChanged;
-
-class BookingEventSubscriber
-{
-    public function handleBookingCreated(BookingCreated $event)
-    {
-        $booking = $event->booking;
-        // Handle booking creation
-    }
-
-    public function handleBookingUpdated(BookingUpdated $event)
-    {
-        $booking = $event->booking;
-        // Handle booking update
-    }
-
-    public function handleBookingDeleted(BookingDeleted $event)
-    {
-        $booking = $event->booking;
-        // Handle booking deletion
-    }
-
-    public function handleBookingStatusChanged(BookingStatusChanged $event)
-    {
-        $booking = $event->booking;
-        $newStatus = $event->newStatus;
-        // Handle status change
-    }
-
-    public function subscribe($events)
-    {
-        $events->listen(BookingCreated::class, [self::class, 'handleBookingCreated']);
-        $events->listen(BookingUpdated::class, [self::class, 'handleBookingUpdated']);
-        $events->listen(BookingDeleted::class, [self::class, 'handleBookingDeleted']);
-        $events->listen(BookingStatusChanged::class, [self::class, 'handleBookingStatusChanged']);
-    }
-}
+$booking = Booking::factory()->pending()->create();
+$room = Room::factory()->create();
+$user = User::factory()->create();
 ```
 
-### Testing
+## Updating PHPDoc
 
-The package includes comprehensive test helpers and factories:
+To update PHPDoc for models, run:
 
-```php
-use CheeasyTech\Booking\Tests\TestCase;
-
-class BookingTest extends TestCase
-{
-    /** @test */
-    public function it_manages_booking_status()
-    {
-        $booking = Booking::factory()->create(['status' => 'pending']);
-
-        $booking->changeStatus('confirmed', 'Approved by admin');
-        
-        $this->assertEquals('confirmed', $booking->status);
-        $this->assertCount(1, $booking->getStatusHistory());
-    }
-
-    /** @test */
-    public function it_prevents_overlapping_bookings()
-    {
-        $room = Room::factory()->create();
-        $user = User::factory()->create();
-
-        // Create first booking
-        Booking::factory()
-            ->for($room, 'bookable')
-            ->for($user, 'bookerable')
-            ->create([
-                'start_time' => '2024-01-01 10:00:00',
-                'end_time' => '2024-01-01 11:00:00',
-                'status' => 'confirmed'
-            ]);
-
-        // Attempt to create overlapping booking
-        $this->expectException(\Exception::class);
-        
-        Booking::factory()
-            ->for($room, 'bookable')
-            ->for($user, 'bookerable')
-            ->create([
-                'start_time' => '2024-01-01 10:30:00',
-                'end_time' => '2024-01-01 11:30:00',
-                'status' => 'pending'
-            ]);
-    }
-}
+```bash
+./update-phpdoc.sh
 ```
 
 ## Contributing
