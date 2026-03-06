@@ -5,6 +5,7 @@ namespace CheeasyTech\Booking\Tests;
 use Carbon\Carbon;
 use CheeasyTech\Booking\BookingStatus;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\Test;
 
 class BookingStatusTest extends TestCase
 {
@@ -14,7 +15,7 @@ class BookingStatusTest extends TestCase
         config(['booking.statuses' => ['pending', 'confirmed', 'cancelled']]);
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_status_with_required_fields()
     {
         $status = new BookingStatus('pending');
@@ -25,7 +26,7 @@ class BookingStatusTest extends TestCase
         $this->assertInstanceOf(Carbon::class, $status->getChangedAt());
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_status_with_all_fields()
     {
         $changedAt = now();
@@ -44,7 +45,7 @@ class BookingStatusTest extends TestCase
         $this->assertEquals($metadata, $status->getMetadata());
     }
 
-    /** @test */
+    #[Test]
     public function it_converts_status_to_array()
     {
         $changedAt = Carbon::parse('2024-01-01 10:00:00');
@@ -66,7 +67,7 @@ class BookingStatusTest extends TestCase
         $this->assertEquals($metadata, $array['metadata']);
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_status_from_array()
     {
         $changedAt = Carbon::parse('2024-01-01 10:00:00');
@@ -85,7 +86,7 @@ class BookingStatusTest extends TestCase
         $this->assertEquals(['key' => 'value'], $status->getMetadata());
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_missing_optional_fields_in_array()
     {
         $array = [
@@ -100,7 +101,7 @@ class BookingStatusTest extends TestCase
         $this->assertNull($status->getMetadata());
     }
 
-    /** @test */
+    #[Test]
     public function it_throws_exception_for_invalid_array()
     {
         $this->expectException(InvalidArgumentException::class);
@@ -111,7 +112,7 @@ class BookingStatusTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_validates_status_against_config()
     {
         $this->expectException(InvalidArgumentException::class);
@@ -120,7 +121,7 @@ class BookingStatusTest extends TestCase
         new BookingStatus('invalid_status');
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_custom_statuses_from_config()
     {
         config(['booking.statuses' => ['custom_status', 'another_status']]);

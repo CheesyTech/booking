@@ -3,6 +3,7 @@
 namespace CheeasyTech\Booking\Tests;
 
 use Carbon\Carbon;
+use PHPUnit\Framework\Attributes\Test;
 use CheeasyTech\Booking\Events\BookingCreated;
 use CheeasyTech\Booking\Events\BookingDeleted;
 use CheeasyTech\Booking\Events\BookingStatusChanged;
@@ -27,7 +28,7 @@ class BookingTest extends TestCase
         config(['booking.statuses' => ['pending', 'confirmed', 'cancelled']]);
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_duration_in_minutes()
     {
         $booking = Booking::factory()
@@ -37,7 +38,7 @@ class BookingTest extends TestCase
         $this->assertEquals(90, $booking->getDurationInMinutes());
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_duration_in_hours()
     {
         $booking = Booking::factory()
@@ -47,7 +48,7 @@ class BookingTest extends TestCase
         $this->assertEquals(1.5, $booking->getDurationInHours());
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_duration_in_days()
     {
         $booking = Booking::factory()
@@ -57,7 +58,7 @@ class BookingTest extends TestCase
         $this->assertEquals(1.0, $booking->getDurationInDays());
     }
 
-    /** @test */
+    #[Test]
     public function it_validates_time_slot()
     {
         $validData = [
@@ -74,7 +75,7 @@ class BookingTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_changes_status_and_maintains_history()
     {
         $booking = Booking::factory()->create(['status' => 'pending']);
@@ -91,7 +92,7 @@ class BookingTest extends TestCase
         Event::assertDispatched(BookingStatusChanged::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_prevents_invalid_status_change()
     {
         $booking = Booking::factory()->create(['status' => 'pending']);
@@ -100,7 +101,7 @@ class BookingTest extends TestCase
         $booking->changeStatus('invalid_status');
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_bookings_by_duration()
     {
         // Create bookings with different durations
@@ -122,7 +123,7 @@ class BookingTest extends TestCase
         $this->assertEquals(2, Booking::durationBetween(45, 105)->count());
     }
 
-    /** @test */
+    #[Test]
     public function it_combines_duration_scopes_with_other_conditions()
     {
         $room = Room::factory()->create();
@@ -166,7 +167,7 @@ class BookingTest extends TestCase
         $this->assertEquals(1, $count);
     }
 
-    /** @test */
+    #[Test]
     public function it_prevents_overlapping_bookings()
     {
         $room = Room::factory()->create();
@@ -196,7 +197,7 @@ class BookingTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_uses_correct_sql_for_duration_filters_with_different_drivers()
     {
         // Test with MySQL
@@ -233,7 +234,7 @@ class BookingTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_minimum_time_between_bookings()
     {
         config(['booking.overlap.min_time_between' => 30]); // 30 minutes minimum between bookings
@@ -264,7 +265,7 @@ class BookingTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_enforces_maximum_duration()
     {
         config(['booking.overlap.max_duration' => 120]); // Maximum 2 hours
@@ -285,7 +286,7 @@ class BookingTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_allows_same_booker_overlap_when_configured()
     {
         config(['booking.overlap.allow_same_booker' => true]);
@@ -316,7 +317,7 @@ class BookingTest extends TestCase
         $this->assertNotNull($booking->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_fires_events_on_model_lifecycle()
     {
         Event::fake([

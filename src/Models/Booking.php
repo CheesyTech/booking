@@ -255,7 +255,7 @@ class Booking extends Model
      */
     public function getDurationInMinutes(): int
     {
-        return $this->start_time->diffInMinutes($this->end_time);
+        return (int) $this->start_time->diffInMinutes($this->end_time);
     }
 
     /**

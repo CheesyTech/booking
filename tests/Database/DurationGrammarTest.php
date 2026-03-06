@@ -5,10 +5,11 @@ namespace CheeasyTech\Booking\Tests\Database;
 use CheeasyTech\Booking\Database\DurationGrammar;
 use CheeasyTech\Booking\Tests\TestCase;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Test;
 
 class DurationGrammarTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_generates_correct_sql_for_sqlite()
     {
         DB::shouldReceive('getDriverName')->once()->andReturn('sqlite');
@@ -21,7 +22,7 @@ class DurationGrammarTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_correct_sql_for_mysql()
     {
         DB::shouldReceive('getDriverName')->once()->andReturn('mysql');
@@ -34,7 +35,7 @@ class DurationGrammarTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_correct_sql_for_pgsql()
     {
         DB::shouldReceive('getDriverName')->once()->andReturn('pgsql');
@@ -47,7 +48,7 @@ class DurationGrammarTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_correct_sql_for_sqlsrv()
     {
         DB::shouldReceive('getDriverName')->once()->andReturn('sqlsrv');
@@ -60,7 +61,7 @@ class DurationGrammarTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_throws_exception_for_unsupported_driver()
     {
         DB::shouldReceive('getDriverName')->once()->andReturn('unsupported');
@@ -71,7 +72,7 @@ class DurationGrammarTest extends TestCase
         DurationGrammar::getDurationExpression('start_time', 'end_time');
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_custom_column_names()
     {
         DB::shouldReceive('getDriverName')->once()->andReturn('mysql');
