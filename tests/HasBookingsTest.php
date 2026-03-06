@@ -44,6 +44,47 @@ class HasBookingsTest extends TestCase
     }
 
     #[Test]
+    public function it_filters_bookings_by_type()
+    {
+        $room = Room::factory()->create();
+        $user = User::factory()->create();
+
+        Booking::factory()
+            ->for($room, 'bookable')
+            ->for($user, 'bookerable')
+            ->create([
+                'start_time' => '2024-01-01 10:00:00',
+                'end_time' => '2024-01-01 11:00:00',
+                'status' => 'pending',
+            ]);
+
+        $this->assertCount(1, $room->bookings(Room::class)->get());
+        $this->assertCount(1, $room->bookings([Room::class])->get());
+    }
+
+    #[Test]
+    public function it_creates_new_booking_via_new_booking()
+    {
+        config(['booking.overlap.enabled' => false]);
+
+        $room = Room::factory()->create();
+        $user = User::factory()->create();
+
+        $booking = $room->newBooking($room, [
+            'bookerable_id' => $user->id,
+            'bookerable_type' => User::class,
+            'start_time' => '2024-01-01 10:00:00',
+            'end_time' => '2024-01-01 11:00:00',
+            'status' => 'pending',
+        ]);
+
+        $this->assertInstanceOf(Booking::class, $booking);
+        $this->assertEquals($room->id, $booking->bookable_id);
+        $this->assertEquals(Room::class, $booking->bookable_type);
+        Event::assertDispatched(BookingCreated::class);
+    }
+
+    #[Test]
     public function it_finds_booking_via_find_booking()
     {
         $room = Room::factory()->create();

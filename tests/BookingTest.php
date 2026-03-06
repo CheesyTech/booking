@@ -76,6 +76,17 @@ class BookingTest extends TestCase
     }
 
     #[Test]
+    public function it_throws_on_validation_failure_for_invalid_date_format()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        Booking::validateTimeSlot([
+            'start_time' => 'invalid-date',
+            'end_time' => '2024-01-01 11:00:00',
+        ]);
+    }
+
+    #[Test]
     public function it_changes_status_and_maintains_history()
     {
         $booking = Booking::factory()->create(['status' => 'pending']);
@@ -337,6 +348,19 @@ class BookingTest extends TestCase
     }
 
     #[Test]
+    public function it_returns_empty_collection_when_no_status_history()
+    {
+        $booking = Booking::factory()->create([
+            'status' => 'pending',
+            'status_history' => null,
+        ]);
+
+        $history = $booking->getStatusHistory();
+
+        $this->assertCount(0, $history);
+    }
+
+    #[Test]
     public function it_returns_current_status()
     {
         $booking = Booking::factory()->create(['status' => 'confirmed']);
@@ -425,6 +449,33 @@ class BookingTest extends TestCase
             ->create([
                 'start_time' => '2024-01-01 20:00:00',
                 'end_time' => '2024-01-01 21:00:00',
+                'status' => 'pending',
+            ]);
+    }
+
+    #[Test]
+    public function it_throws_for_unknown_overlap_rule()
+    {
+        config([
+            'booking.overlap.rules' => [
+                'unknown_rule' => [
+                    'enabled' => true,
+                ],
+            ],
+        ]);
+
+        $room = Room::factory()->create();
+        $user = User::factory()->create();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown rule: unknown_rule');
+
+        Booking::factory()
+            ->for($room, 'bookable')
+            ->for($user, 'bookerable')
+            ->create([
+                'start_time' => '2024-01-01 10:00:00',
+                'end_time' => '2024-01-01 11:00:00',
                 'status' => 'pending',
             ]);
     }

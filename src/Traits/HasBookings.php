@@ -32,12 +32,12 @@ trait HasBookings
         return $query;
     }
 
-    public function newBooking(Bookable $bookable): Booking
+    public function newBooking(Bookable $bookable, array $attributes = []): Booking
     {
-        $booking = $this->bookings()->create([
+        $booking = $this->bookings()->create(array_merge([
             'bookable_id' => $bookable->getBookableId(),
             'bookable_type' => $bookable->getBookableType(),
-        ]);
+        ], $attributes));
         event(new BookingCreated($booking));
 
         return $booking;

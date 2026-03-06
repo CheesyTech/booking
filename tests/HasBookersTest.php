@@ -33,4 +33,23 @@ class HasBookersTest extends TestCase
         $this->assertCount(1, $user->bookings);
         $this->assertEquals($user->id, $user->bookings->first()->bookerable_id);
     }
+
+    #[Test]
+    public function it_filters_bookings_by_type()
+    {
+        $room = Room::factory()->create();
+        $user = User::factory()->create();
+
+        Booking::factory()
+            ->for($room, 'bookable')
+            ->for($user, 'bookerable')
+            ->create([
+                'start_time' => '2024-01-01 10:00:00',
+                'end_time' => '2024-01-01 11:00:00',
+                'status' => 'pending',
+            ]);
+
+        $this->assertCount(1, $user->bookings(User::class)->get());
+        $this->assertCount(1, $user->bookings([User::class])->get());
+    }
 }
