@@ -29,9 +29,9 @@
     "ergebnis/composer-normalize": "^2.43",
     "laravel/pint": "^1.0",
     "mockery/mockery": "^1.5",
-    "nunomaduro/collision": "^8.0",
-    "orchestra/testbench": "^10.0",
-    "phpunit/phpunit": "^12.0"
+    "nunomaduro/collision": "^7.0|^8.0",
+    "orchestra/testbench": "^8.0|^9.0|^10.0",
+    "phpunit/phpunit": "^10.0|^11.0|^12.0"
   },
   "autoload": {
     "psr-4": {
