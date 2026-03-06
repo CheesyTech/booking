@@ -48,7 +48,7 @@ jobs:
           composer update --no-interaction --prefer-dist
 
       - name: Run tests
-        run: composer test -- --coverage-clover=coverage.xml --coverage-text
+        run: composer test -- --coverage-clover=coverage.xml --coverage-text --coverage-filter=src
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
