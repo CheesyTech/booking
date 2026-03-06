@@ -46,9 +46,14 @@ jobs:
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
           case "${{ matrix.laravel }}" in
-            10.*) composer require "orchestra/testbench:^8.0" --no-interaction --no-update ;;
-            11.*) composer require "orchestra/testbench:^9.0" --no-interaction --no-update ;;
-            12.*) composer require "orchestra/testbench:^10.0" --no-interaction --no-update ;;
+            10.*) composer require "orchestra/testbench:^8.0" --no-interaction --no-update --dev ;;
+            11.*) composer require "orchestra/testbench:^9.0" --no-interaction --no-update --dev ;;
+            12.*) composer require "orchestra/testbench:^10.0" --no-interaction --no-update --dev ;;
+          esac
+          case "${{ matrix.php }}" in
+            8.1) composer require "phpunit/phpunit:^10.0" --no-interaction --no-update --dev ;;
+            8.2) composer require "phpunit/phpunit:^11.0" --no-interaction --no-update --dev ;;
+            *) composer require "phpunit/phpunit:^12.0" --no-interaction --no-update --dev ;;
           esac
           composer update --no-interaction --prefer-dist
 
