@@ -7,20 +7,14 @@ namespace CheeasyTech\Booking\Traits;
 use CheeasyTech\Booking\Contracts\Bookerable;
 use CheeasyTech\Booking\Models\Booking;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait HasBookers
 {
-    public function bookings(string|array|null $type = null): MorphToMany
+    public function bookings(string|array|null $type = null): MorphMany
     {
         /** @var Model $this */
-        $query = $this->morphToMany(
-            Booking::class,
-            'bookable',
-            'bookings',
-            'bookable_id',
-            'bookerable_id'
-        );
+        $query = $this->morphMany(Booking::class, 'bookerable');
 
         if ($type) {
             $types = is_array($type) ? $type : [$type];

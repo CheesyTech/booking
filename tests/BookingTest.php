@@ -335,4 +335,97 @@ class BookingTest extends TestCase
         $booking->delete();
         Event::assertDispatched(BookingDeleted::class);
     }
+
+    #[Test]
+    public function it_returns_current_status()
+    {
+        $booking = Booking::factory()->create(['status' => 'confirmed']);
+
+        $status = $booking->getCurrentStatus();
+
+        $this->assertEquals('confirmed', $status->getStatus());
+        $this->assertNull($status->getReason());
+    }
+
+    #[Test]
+    public function it_checks_has_status()
+    {
+        $booking = Booking::factory()->create(['status' => 'pending']);
+
+        $this->assertTrue($booking->hasStatus('pending'));
+        $this->assertFalse($booking->hasStatus('confirmed'));
+    }
+
+    #[Test]
+    public function it_returns_false_for_has_overlap_when_disabled()
+    {
+        config(['booking.overlap.enabled' => false]);
+
+        $room = Room::factory()->create();
+        $user = User::factory()->create();
+        $booking = Booking::factory()
+            ->for($room, 'bookable')
+            ->for($user, 'bookerable')
+            ->create([
+                'start_time' => '2024-01-01 10:00:00',
+                'end_time' => '2024-01-01 11:00:00',
+                'status' => 'pending',
+            ]);
+
+        $startTime = Carbon::parse('2024-01-01 10:30:00');
+        $endTime = Carbon::parse('2024-01-01 11:30:00');
+
+        $this->assertFalse($booking->hasOverlap($startTime, $endTime));
+    }
+
+    #[Test]
+    public function it_excludes_booking_id_when_checking_overlap()
+    {
+        $room = Room::factory()->create();
+        $user = User::factory()->create();
+        $booking = Booking::factory()
+            ->for($room, 'bookable')
+            ->for($user, 'bookerable')
+            ->create([
+                'start_time' => '2024-01-01 10:00:00',
+                'end_time' => '2024-01-01 11:00:00',
+                'status' => 'pending',
+            ]);
+
+        $this->assertFalse($booking->hasOverlap(
+            Carbon::parse('2024-01-01 10:00:00'),
+            Carbon::parse('2024-01-01 11:00:00'),
+            $booking->id
+        ));
+    }
+
+    #[Test]
+    public function it_enforces_business_hours_rule_when_configured()
+    {
+        config([
+            'booking.overlap.rules' => [
+                'business_hours' => [
+                    'enabled' => true,
+                    'start' => '09:00',
+                    'end' => '18:00',
+                    'timezone' => 'UTC',
+                ],
+            ],
+        ]);
+
+        $room = Room::factory()->create();
+        $user = User::factory()->create();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Bookings are only allowed between');
+
+        Booking::factory()
+            ->for($room, 'bookable')
+            ->for($user, 'bookerable')
+            ->create([
+                'start_time' => '2024-01-01 20:00:00',
+                'end_time' => '2024-01-01 21:00:00',
+                'status' => 'pending',
+            ]);
+    }
 }
