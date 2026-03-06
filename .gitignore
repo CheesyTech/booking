@@ -5,3 +5,4 @@ composer.lock
 database.sqlite
 /.idea/
 /coverage/
+coverage.xml

@@ -3,6 +3,7 @@
 ![Laravel](https://img.shields.io/badge/laravel-10%20%7C%2011%20%7C%2012-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Tests](https://github.com/cheesytech/booking/actions/workflows/tests.yml/badge.svg)
+[![codecov](https://codecov.io/gh/cheesytech/booking/graph/badge.svg)](https://codecov.io/gh/cheesytech/booking)
 
 # Laravel Booking
 
