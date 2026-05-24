@@ -1,6 +1,6 @@
 ![Packagist Version](https://img.shields.io/packagist/v/cheesytech/booking)
 ![PHP Version](https://img.shields.io/badge/php-8.1%2B-blue)
-![Laravel](https://img.shields.io/badge/laravel-10%20%7C%2011%20%7C%2012-red)
+![Laravel](https://img.shields.io/badge/laravel-10%20%7C%2011%20%7C%2012%20%7C%2013-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Tests](https://github.com/cheesytech/booking/actions/workflows/tests.yml/badge.svg)
 [![codecov](https://codecov.io/gh/cheesytech/booking/graph/badge.svg?token=J8R6COA4KU)](https://codecov.io/gh/cheesytech/booking)
@@ -25,10 +25,10 @@ A flexible and powerful booking system for Laravel applications that supports po
 - ⏱️ Flexible duration calculations (minutes, hours, days)
 - 🛠️ Publishable config and migration files
 
-## Requirements
+## Requirements 
 
 - PHP 8.1 or higher
-- Laravel 10.0, 11.0, or 12.0
+- Laravel 10.0, 11.0, 12.0, or 13.0
 - Carbon 2.0 or higher
 
 ## Installation
